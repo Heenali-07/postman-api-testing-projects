@@ -1,0 +1,16 @@
+{
+  "name": "api-testing-postman-revision",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Postman API testing revision project covering REST, HTTP methods, auth, variables, scripts, assertions, chaining, data driven testing, and Newman.",
+  "scripts": {
+    "test": "newman run Pavan-Sir-API-Testing-Revision.postman_collection.json -e QA-Environment.postman_environment.json",
+    "test:data": "newman run Pavan-Sir-API-Testing-Revision.postman_collection.json -e QA-Environment.postman_environment.json --folder \"11 Data Driven Testing\" -d test-data/users.csv",
+    "test:report": "newman run Pavan-Sir-API-Testing-Revision.postman_collection.json -e QA-Environment.postman_environment.json -r cli,htmlextra --reporter-htmlextra-export reports/api-test-report.html"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
+

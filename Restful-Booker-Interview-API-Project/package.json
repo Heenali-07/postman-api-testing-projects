@@ -1,0 +1,15 @@
+{
+  "name": "restful-booker-interview-api-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Postman interview project for Restful Booker API covering auth, positive and negative scenarios, chaining, schema validation, and Newman.",
+  "scripts": {
+    "test": "newman run Restful-Booker-Interview-Project.postman_collection.json -e Restful-Booker-QA.postman_environment.json",
+    "test:report": "newman run Restful-Booker-Interview-Project.postman_collection.json -e Restful-Booker-QA.postman_environment.json -r cli,htmlextra --reporter-htmlextra-export reports/restful-booker-report.html"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
+

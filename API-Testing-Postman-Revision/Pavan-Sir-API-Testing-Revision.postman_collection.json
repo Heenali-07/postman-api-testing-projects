@@ -1,0 +1,958 @@
+{
+  "info": {
+    "_postman_id": "acdd7da4-3e86-47d3-91cd-api-testing-revision",
+    "name": "Pavan Sir API Testing Revision",
+    "description": "Hands-on Postman revision collection covering API basics, HTTP methods, params, headers, authorization, variables, environments, scripts, assertions, chaining, data driven testing, negative testing, and Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.collectionVariables.set('collectionRunTime', new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Response time is less than 3000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "expectedUserId",
+      "value": "1"
+    },
+    {
+      "key": "collectionRunTime",
+      "value": ""
+    },
+    {
+      "key": "name",
+      "value": "Default Learner"
+    },
+    {
+      "key": "email",
+      "value": "default.learner@example.com"
+    },
+    {
+      "key": "role",
+      "value": "qa"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 API Basics and Health",
+      "item": [
+        {
+          "name": "Health Check - Simple GET",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{jsonPlaceholderBaseUrl}}/posts",
+              "host": [
+                "{{jsonPlaceholderBaseUrl}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Basic request-response practice. Observe method, URL, status code, headers, and response body."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 GET Requests",
+      "item": [
+        {
+          "name": "GET All Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const posts = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has many posts', function () {",
+                  "    pm.expect(posts.length).to.be.above(10);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/posts"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Single Post Using Path Variable",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const post = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Post id matches environment variable', function () {",
+                  "    pm.expect(post.id).to.eql(Number(pm.environment.get('postId')));",
+                  "});",
+                  "",
+                  "pm.test('Post has required fields', function () {",
+                  "    pm.expect(post).to.have.keys(['userId', 'id', 'title', 'body']);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/posts/{{postId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Comments With Query Params",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const comments = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Every comment belongs to post 1', function () {",
+                  "    comments.forEach(function (comment) {",
+                  "        pm.expect(comment.postId).to.eql(1);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{jsonPlaceholderBaseUrl}}/comments?postId=1",
+              "host": [
+                "{{jsonPlaceholderBaseUrl}}"
+              ],
+              "path": [
+                "comments"
+              ],
+              "query": [
+                {
+                  "key": "postId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 POST Requests",
+      "item": [
+        {
+          "name": "POST Create Post With Raw JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response contains created id', function () {",
+                  "    pm.expect(response.id).to.exist;",
+                  "});",
+                  "",
+                  "pm.environment.set('createdPostId', response.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman API Testing Revision\",\n  \"body\": \"Learning POST request with raw JSON body\",\n  \"userId\": 1\n}"
+            },
+            "url": "{{jsonPlaceholderBaseUrl}}/posts"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Echo Form Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Form data is returned by echo API', function () {",
+                  "    pm.expect(response.form.name).to.eql('Postman Learner');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Postman Learner",
+                  "type": "text"
+                },
+                {
+                  "key": "topic",
+                  "value": "form-data",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{postmanEchoBaseUrl}}/post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 PUT PATCH DELETE",
+      "item": [
+        {
+          "name": "PUT Full Update Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Title is updated', function () {",
+                  "    pm.expect(response.title).to.eql('Updated full title');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"title\": \"Updated full title\",\n  \"body\": \"Full resource update using PUT\",\n  \"userId\": 1\n}"
+            },
+            "url": "{{jsonPlaceholderBaseUrl}}/posts/1"
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Partial Update Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Only title is patched', function () {",
+                  "    pm.expect(response.title).to.eql('Partially updated title');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Partially updated title\"\n}"
+            },
+            "url": "{{jsonPlaceholderBaseUrl}}/posts/1"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/posts/1"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Headers and Status Codes",
+      "item": [
+        {
+          "name": "Send Custom Headers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Custom header is received', function () {",
+                  "    pm.expect(response.headers['x-learning-topic']).to.eql('headers');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Learning-Topic",
+                "value": "headers"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{postmanEchoBaseUrl}}/headers"
+          },
+          "response": []
+        },
+        {
+          "name": "404 Not Found Status Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/wrong-endpoint"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 Authorization",
+      "item": [
+        {
+          "name": "Basic Auth - Valid Credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Authentication is true', function () {",
+                  "    pm.expect(response.authenticated).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{authUsername}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{authPassword}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{postmanEchoBaseUrl}}/basic-auth"
+          },
+          "response": []
+        },
+        {
+          "name": "Bearer Token Header",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Authorization header contains bearer token', function () {",
+                  "    pm.expect(response.headers.authorization).to.include('Bearer');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{postmanEchoBaseUrl}}/headers"
+          },
+          "response": []
+        },
+        {
+          "name": "API Key Header",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('API key header is present', function () {",
+                  "    pm.expect(response.headers['x-api-key']).to.eql(pm.environment.get('apiKey'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": "{{postmanEchoBaseUrl}}/headers"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 Variables and Environments",
+      "item": [
+        {
+          "name": "Use Environment Base URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Environment variable is available', function () {",
+                  "    pm.expect(pm.environment.get('jsonPlaceholderBaseUrl')).to.include('jsonplaceholder');",
+                  "});",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/users/1"
+          },
+          "response": []
+        },
+        {
+          "name": "Use Collection Variable",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Collection variable expectedUserId is used', function () {",
+                  "    pm.expect(response.id).to.eql(Number(pm.collectionVariables.get('expectedUserId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/users/{{expectedUserId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 Pre-request Scripts",
+      "item": [
+        {
+          "name": "Create Dynamic Post Data",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "pm.environment.set('randomTitle', `Dynamic title ${timestamp}`);",
+                  "pm.environment.set('randomBody', `Dynamic body generated at ${timestamp}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Dynamic title is used in response', function () {",
+                  "    pm.expect(response.title).to.eql(pm.environment.get('randomTitle'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{randomTitle}}\",\n  \"body\": \"{{randomBody}}\",\n  \"userId\": 1\n}"
+            },
+            "url": "{{jsonPlaceholderBaseUrl}}/posts"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 Tests and Assertions",
+      "item": [
+        {
+          "name": "Validate User Response Body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const user = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('User has valid email', function () {",
+                  "    pm.expect(user.email).to.include('@');",
+                  "});",
+                  "",
+                  "pm.test('User has address object', function () {",
+                  "    pm.expect(user.address).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('User company has name', function () {",
+                  "    pm.expect(user.company.name).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/users/1"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 API Chaining",
+      "item": [
+        {
+          "name": "Step 1 - Get User And Save User Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const user = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.environment.set('chainedUserId', user.id);",
+                  "",
+                  "pm.test('User id saved for next request', function () {",
+                  "    pm.expect(pm.environment.get('chainedUserId')).to.eql(String(user.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/users/1"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 2 - Use Saved User Id To Get Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const posts = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Posts belong to saved user id', function () {",
+                  "    posts.forEach(function (post) {",
+                  "        pm.expect(post.userId).to.eql(Number(pm.environment.get('chainedUserId')));",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{jsonPlaceholderBaseUrl}}/posts?userId={{chainedUserId}}",
+              "host": [
+                "{{jsonPlaceholderBaseUrl}}"
+              ],
+              "path": [
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{chainedUserId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 Data Driven Testing",
+      "item": [
+        {
+          "name": "POST User From CSV or JSON Data File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const expectedName = pm.iterationData.get('name') || pm.variables.get('name');",
+                  "const expectedEmail = pm.iterationData.get('email') || pm.variables.get('email');",
+                  "",
+                  "pm.test('Name is sent correctly', function () {",
+                  "    pm.expect(response.json.name).to.eql(expectedName);",
+                  "});",
+                  "",
+                  "pm.test('Email is sent correctly', function () {",
+                  "    pm.expect(response.json.email).to.eql(expectedEmail);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"role\": \"{{role}}\"\n}"
+            },
+            "url": "{{postmanEchoBaseUrl}}/post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 Negative Testing",
+      "item": [
+        {
+          "name": "Invalid Endpoint Should Return 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{jsonPlaceholderBaseUrl}}/invalid-api-path"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Basic Auth Should Return 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 401', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "wrong-user",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "wrong-password",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{postmanEchoBaseUrl}}/basic-auth"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13 XML and SOAP Basics",
+      "item": [
+        {
+          "name": "POST XML Body To Echo API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Raw XML body is sent', function () {",
+                  "    pm.expect(response.data).to.include('<student>');",
+                  "    pm.expect(response.data).to.include('<topic>XML Basics</topic>');",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is XML', function () {",
+                  "    pm.expect(response.headers['content-type']).to.include('application/xml');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/xml"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<student>\n  <name>Postman Learner</name>\n  <topic>XML Basics</topic>\n</student>"
+            },
+            "url": "{{postmanEchoBaseUrl}}/post",
+            "description": "Use this request to compare JSON and XML body formats. SOAP APIs commonly use XML envelopes, while REST APIs commonly use JSON."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

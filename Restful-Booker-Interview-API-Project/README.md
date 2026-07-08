@@ -1,4 +1,4 @@
-# Restful Booker Interview API Project
+# RRestful-Booke-API/README.md
 
 This project is designed for API testing interview preparation using Postman and Newman.
 

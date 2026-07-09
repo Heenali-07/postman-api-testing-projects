@@ -1,6 +1,3 @@
-# Interview Notes
-
-## How To Explain This Project
 
 I used Restful Booker API to create an end-to-end API testing project in Postman. I covered authentication, booking CRUD operations, positive scenarios, negative scenarios, API chaining, schema validation, and Newman execution.
 
